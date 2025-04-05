@@ -1,6 +1,9 @@
 #pragma once
+
 #include <UniversalTelegramBot.h>
 #include <WiFiClientSecure.h>
+
+#include "Config.h"
 
 class TelegramNotifier 
 {
@@ -9,6 +12,13 @@ class TelegramNotifier
     UniversalTelegramBot bot{BOT_TOKEN, client};
 
   public:
-    void begin();
-    void send_message(const String& msg);
+    void begin()
+    {
+      client.setInsecure();
+    }
+    void send_message(const String& msg)
+    {
+      Serial.println("Попытка отправить сообщение в Telegram...");
+      bot.sendMessage(CHAT_ID, msg, "HTML");
+    }
 };
