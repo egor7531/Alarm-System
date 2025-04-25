@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ArduinoJson.h>
 #include <UniversalTelegramBot.h>
 #include <WiFiClientSecure.h>
 

@@ -1,4 +1,3 @@
-#include <ArduinoJson.h>
 #include <WiFi.h>
 
 #include "Config.h"
