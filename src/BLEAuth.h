@@ -1,84 +1,48 @@
-/*#pragma once
-#include <NimBLEDevice.h>
+#pragma once
+
+#include <Arduino.h>
+#include <BLEDevice.h>
+#include <BLEAdvertisedDevice.h>
+#include <BLEScan.h>
 #include "Config.h"
-#include "TelegramBot.h"
 
-class BLEAuthHandler {
-private:
-    NimBLEScan* pBLEScan;
-    TelegramNotifier* notifier;
-    int successfulAuthCount = 0;
-    bool deviceFoundInCurrentScan = false;
-    uint32_t lastAuthTime = 0;
-
-    class MyScanCallbacks : public NimBLEScanCallbacks {
-    private:
-        BLEAuthHandler* parent;
-    public:
-        MyScanCallbacks(BLEAuthHandler* p) : parent(p) {}
-
-        void onResult(NimBLEAdvertisedDevice* advertisedDevice) {
-            if (advertisedDevice->haveName()) {
-                Serial.printf("[BLE] Обнаружено устройство: %s (RSSI: %ddB)\n", 
-                             advertisedDevice->getName().c_str(), 
-                             advertisedDevice->getRSSI());
-            }
-            
-            if (advertisedDevice->haveName() && 
-                advertisedDevice->getName() == TARGET_DEVICE_NAME) {
-                int rssi = advertisedDevice->getRSSI();
-                Serial.printf("[BLE] ✅ Найдено целевое устройство! RSSI: %ddB (Порог: %ddB)\n", 
-                             rssi, RSSI_THRESHOLD);
-
-                if (rssi > RSSI_THRESHOLD && !parent->deviceFoundInCurrentScan) {
-                    parent->deviceFoundInCurrentScan = true;
-                    parent->on_successful_auth();
-                }
-            }
-        }
-    };
-
+class BLEAuth {
 public:
-    BLEAuthHandler() : pBLEScan(nullptr), notifier(nullptr) {}
+  void begin() {
+    BLEDevice::init("");
+    scanner = BLEDevice::getScan();
+    scanner->setActiveScan(true);
+    scanner->setInterval(100);
+    scanner->setWindow(99);
+  }
 
-    void begin(TelegramNotifier* bot) {
-        notifier = bot;
-        NimBLEDevice::init("ESP32-BLE-Auth");
-        NimBLEDevice::setPower(ESP_PWR_LVL_P9); // Максимальная мощность
-        
-        pBLEScan = NimBLEDevice::getScan();
-        pBLEScan->setScanCallbacks(new MyScanCallbacks(this));
-        pBLEScan->setActiveScan(true);
-        pBLEScan->setInterval(67); // 67.5 ms
-        pBLEScan->setWindow(33);   // 33.75 ms 
-        pBLEScan->setDuplicateFilter(true);
-        
-        Serial.println("[BLE] Инициализация завершена");
-    }
+  void update() {
+    BLEScanResults* results = scanner->start(SCAN_TIME, false);
+    authorized = false;
 
-    void start_scan() {
-        if (millis() - lastAuthTime < 10000) return; // Защита от частых сканирований
-        
-        deviceFoundInCurrentScan = false;
-        if (pBLEScan) {
-            Serial.println("[BLE] 🔍 Запуск сканирования...");
-            pBLEScan->start(SCAN_TIME, false);
-            pBLEScan->clearResults();
-            Serial.println("[BLE] Сканирование завершено");
+    for (int i = 0; i < results->getCount(); i++) {
+      BLEAdvertisedDevice dev = results->getDevice(i);
+      String addr = dev.getAddress().toString().c_str();
+      int rssi = dev.getRSSI();
+
+      if (rssi >= RSSI_THRESHOLD && dev.haveName() && dev.getName() == BLE_NAME) {
+        authorized = true;
+        if (!lastAuthorized) {
+          Serial.print("✅ Обнаружено разрешённое устройство: ");
+          Serial.println(addr);
         }
+        break;
+      }
     }
+    scanner->clearResults();
+  }
 
-    void on_successful_auth() {
-        successfulAuthCount++;
-        lastAuthTime = millis();
-        Serial.printf("[BLE] 🔑 Успешная попытка %d/%d\n", successfulAuthCount, AUTH_REQUIRED_COUNT);
-        
-        if (successfulAuthCount >= AUTH_REQUIRED_COUNT) {
-            Serial.println("[BLE] 🔓 Аутентификация успешна!");
-            if (notifier) {
-                notifier->send_message(F("🔓 BLE аутентификация успешна! Доступ разрешён."));
-            }
-            successfulAuthCount = 0;
-        }
-    }
+  bool isAuthorized() const   { return authorized;    }
+  bool wasAuthorized() const  { return lastAuthorized;}
+  void setLastAuthorized(bool s) { lastAuthorized = s;  }
+
+private:
+  BLEScan* scanner       = nullptr;
+  bool     authorized    = false;
+  bool     lastAuthorized= false;
 };
