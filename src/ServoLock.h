@@ -8,7 +8,7 @@ class ServoLock {
 private:
   Servo lockServo;
   bool isUnlocked = false;
-  
+
 public:
   void begin() {
     lockServo.attach(SERVO_PIN);
@@ -34,7 +34,7 @@ public:
       lockServo.write(SERVO_FORWARD);
       delay(SERVO_DELAY);
       lockServo.write(SERVO_STOP);
-      isUnlocked = true;
+      isUnlocked = false;
     }
   }
 
