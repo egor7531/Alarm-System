@@ -2,16 +2,25 @@
 
 #include <Arduino.h>
 
-class MotionSensor {
+#include "Config.h"
+
+class MotionSensor 
+{
+private:
+  int  sensorPin = PIR_PIN;
+  bool lastState = false;
+  
 public:
-  void begin(int pin) {
-    sensorPin = pin;
+  void begin() 
+  {
     pinMode(sensorPin, INPUT);
   }
 
-  bool check_motion() {
+  bool check_motion() 
+  {
     bool currentState = digitalRead(sensorPin);
-    if (currentState && !lastState) {
+    if (currentState && !lastState) 
+    {
       lastState = true;
       Serial.println("🚨 Движение обнаружено!");
       return true;
@@ -19,8 +28,4 @@ public:
     lastState = currentState;
     return false;
   }
-
-private:
-  int  sensorPin;
-  bool lastState = false;
 };

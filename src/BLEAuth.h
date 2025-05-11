@@ -4,16 +4,19 @@
 #include <BLEDevice.h>
 #include <BLEAdvertisedDevice.h>
 #include <BLEScan.h>
+
 #include "Config.h"
 
-class BLEAuth {
+class BLEAuth 
+{
 public:
-  void begin() {
+  void begin() 
+  {
     BLEDevice::init("");
     scanner = BLEDevice::getScan();
     scanner->setActiveScan(true);
-    scanner->setInterval(100);
-    scanner->setWindow(99);
+    scanner->setInterval(33);
+    scanner->setWindow(32);
   }
 
   void update() {
@@ -27,10 +30,10 @@ public:
 
       if (rssi >= RSSI_THRESHOLD && dev.haveName() && dev.getName() == BLE_NAME) {
         authorized = true;
-        if (!lastAuthorized) {
+        /*if (!lastAuthorized) {
           Serial.print("✅ Обнаружено разрешённое устройство: ");
           Serial.println(addr);
-        }
+        }*/
         break;
       }
     }
