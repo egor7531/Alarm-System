@@ -6,6 +6,10 @@ import state
 
 app = Flask(__name__)
 
+@app.route('/get_mode')
+def get_mode():
+    return state.get_mode(), 200
+
 @app.route('/notify', methods=['POST'])
 def notify():
     data = request.get_json()

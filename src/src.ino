@@ -15,9 +15,9 @@ ServoLock        lock;
 MotionSensor     motionSensor;
 
 bool prevAuth   = false;
-bool deviceSent = false;
 unsigned long previousMillis = 0;
-const long interval = 5000;
+const long interval = 10000;
+bool autoMode = true;
 
 void send_to_server(String event) 
 {
@@ -64,11 +64,38 @@ void setup() {
     Serial.println("Проверьте: SSID, пароль и настройки точки доступа.");
   }
   
+  server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", "pong");
+  });
+
   server.on("/command", HTTP_GET, [](AsyncWebServerRequest *request)
   {
     if(request->hasParam("action")) 
     {
         String action = request->getParam("action")->value();
+
+        if(action == "enableble") 
+        {
+            if(request->hasParam("value")) 
+            {
+                String value = request->getParam("value")->value();
+                if(value == "1") 
+                {
+                    autoMode = true;
+                    bleAuth.begin();
+                    bleAuth.enable(true);
+                    request->send(200, "text/plain", "BLE enabled");
+                } 
+                else 
+                {
+                  autoMode = false;
+                    bleAuth.enable(false);
+                    request->send(200, "text/plain", "BLE disabled");
+                }
+                return;
+            }
+        }
+        
         if(action == "open" || action == "close") 
         {
             handle_command(action);
@@ -87,10 +114,12 @@ void setup() {
 
 void loop() 
 {
-  bleAuth.update();
+  if(autoMode) 
+    bleAuth.update();
+
   bool currAuth = bleAuth.isAuthorized();
 
-  if (currAuth && !prevAuth) 
+  if(currAuth && !prevAuth) 
   {
       lock.open();
       Serial.println("🔓 Замок открыт");

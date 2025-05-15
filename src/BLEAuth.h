@@ -12,7 +12,7 @@ class BLEAuth
 private:
   BLEScan* scanner       = nullptr;
   bool     authorized    = false;
-  
+  bool      enabled      = true;
 public:
   void begin() 
   {
@@ -23,8 +23,21 @@ public:
     scanner->setWindow(32);
   }
 
+  void enable(bool state) {
+        enabled = state;
+        if(!state) {
+            // Останавливаем сканирование при выключении
+            if(scanner) {
+                scanner->stop();
+                scanner->clearResults();
+            }
+        }
+    }
+
   void update() 
   {
+    if(!enabled) return;
+
     BLEScanResults* results = scanner->start(SCAN_TIME, false);
     authorized = false;
 
