@@ -7,3 +7,20 @@ Specifically, our project is a box that we made using laser cutting. It opens/cl
 
 ![Device](https://github.com/egor7531/Alarm-System/blob/main/images/project.png)
 ![Lock](https://github.com/egor7531/Alarm-System/blob/main/images/lock.JPG)
+
+## Task
+Create an autonomous security system that:
+- Managed via Telegram
+- Integrates with the existing door system
+- It works in two modes: manual and automatic
+- Sends notifications about events in real time
+
+## Solution
+**Hardware**: 
+- ESP32
+- Servo motor
+- Motion sensor  
+**Software part**:
+- Telegram bot in Python
+- REST API on Flask for event handling
+- ESP32 with Wi-Fi/BLE support
