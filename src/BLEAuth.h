@@ -9,6 +9,10 @@
 
 class BLEAuth 
 {
+private:
+  BLEScan* scanner       = nullptr;
+  bool     authorized    = false;
+  
 public:
   void begin() 
   {
@@ -19,33 +23,28 @@ public:
     scanner->setWindow(32);
   }
 
-  void update() {
+  void update() 
+  {
     BLEScanResults* results = scanner->start(SCAN_TIME, false);
     authorized = false;
 
-    for (int i = 0; i < results->getCount(); i++) {
+    for (int i = 0; i < results->getCount(); i++) 
+    {
       BLEAdvertisedDevice dev = results->getDevice(i);
       String addr = dev.getAddress().toString().c_str();
       int rssi = dev.getRSSI();
 
-      if (rssi >= RSSI_THRESHOLD && dev.haveName() && dev.getName() == BLE_NAME) {
+      if (rssi >= RSSI_THRESHOLD && dev.haveName() && dev.getName() == BLE_NAME) 
+      {
         authorized = true;
-        /*if (!lastAuthorized) {
-          Serial.print("✅ Обнаружено разрешённое устройство: ");
-          Serial.println(addr);
-        }*/
         break;
       }
     }
     scanner->clearResults();
   }
 
-  bool isAuthorized() const   { return authorized;    }
-  bool wasAuthorized() const  { return lastAuthorized;}
-  void setLastAuthorized(bool s) { lastAuthorized = s;  }
-
-private:
-  BLEScan* scanner       = nullptr;
-  bool     authorized    = false;
-  bool     lastAuthorized= false;
+  bool isAuthorized() const 
+  { 
+    return authorized;    
+  }
 };

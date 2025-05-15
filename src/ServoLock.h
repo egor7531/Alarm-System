@@ -2,15 +2,18 @@
 
 #include <Arduino.h>
 #include <ESP32Servo.h>
+
 #include "Config.h"
 
-class ServoLock {
+class ServoLock 
+{
 private:
   Servo lockServo;
   bool isUnlocked = false;
 
 public:
-  void begin() {
+  void begin() 
+  {
     lockServo.attach(SERVO_PIN);
     lockServo.write(SERVO_STOP);
     isUnlocked = false;
