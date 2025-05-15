@@ -25,3 +25,6 @@ Create an autonomous security system that:
 - Telegram bot in Python
 - REST API on Flask for event handling
 - ESP32 with Wi-Fi/BLE support
+
+## Support
+If you have any questions, you can contact us here: [Egor](https://t.me/Nojey), [Anton](https://t.me/toshach)
