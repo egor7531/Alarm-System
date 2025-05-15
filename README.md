@@ -19,7 +19,8 @@ Create an autonomous security system that:
 **Hardware**: 
 - ESP32
 - Servo motor
-- Motion sensor  
+- Motion sensor
+
 **Software part**:
 - Telegram bot in Python
 - REST API on Flask for event handling
